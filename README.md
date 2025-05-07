@@ -44,7 +44,7 @@ class State(enum):
 6. **CLI layer** wiring everything together
 
 
-![[Architecture Overview.png]]
+![Architecture Overview](Architecture%20Overview.png)
 
 ## JSON Schema
 - **Complete Version:**
