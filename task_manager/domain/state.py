@@ -1,4 +1,5 @@
 # task_manager/domain/state.py
+
 from enum import Enum
 
 class State(Enum):

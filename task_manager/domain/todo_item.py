@@ -1,4 +1,5 @@
 # task_manager/domain/todo_item.py
+
 from dataclasses import dataclass
 from typing import Optional
 from datetime import datetime
@@ -21,10 +22,13 @@ class ToDoItem:
 
     @staticmethod
     def create(text: str) -> "ToDoItem":
+        if not text or not isinstance(text, str):
+            raise ValueError("ToDoItem text must be a non-empty string")
+
         return ToDoItem(
             guid=str(uuid.uuid4()),
             text=text,
-            position=0,  # Will be reassigned by `add_todo_item`
+            position=0,  # will be updated by `add_todo_item`
             completed=False,
             created_at=datetime.now(),
             completed_at=None,

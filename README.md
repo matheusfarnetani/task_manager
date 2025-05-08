@@ -73,7 +73,7 @@ class State(enum):
       "completed_at": "2025-05-05T12:00:00Z" 
     }
   ],
-  "state": 2, // Enum(State, [("PENDING", 1), ("IN_PROGRESS", 2), ("COMPLETED", 3)]),
+  "state": 2,
   "deadline": "2025-05-08T16:00:00Z",
   "completed_at": "2025-05-08T16:00:00Z",
   "created_by": "Gaston",
@@ -86,8 +86,8 @@ class State(enum):
 {
   "guid": "e822ccac-0ddc-4251-826a-6e047099ccfe",
   "title": "Something",
-  "position": 1,
   "description": "Or other",
+  "position": 1,
   "todo": [
     {
       "guid": "bcfb27f9-b0a7-4de5-9ec8-c10ca6637ba2",
@@ -106,7 +106,7 @@ class State(enum):
       "completed_at": "2025-05-05T12:00:00Z" 
     }
   ],
-  "state": 2, // Enum(State, [("PENDING", 1), ("IN_PROGRESS", 2), ("COMPLETED", 3)]),
+  "state": 2,
   "deadline": "2025-05-08T16:00:00Z",
   "completed_at": "2025-05-08T16:00:00Z",
 }
@@ -194,23 +194,22 @@ Component(s) at the service and manager layer track when data has changed and ca
 - Basic CRUD operations for any entity
 
 #### `TaskService`
-- Add, remove, or modify `ToDoItem`s
-- Reorder `ToDoItem`s within a task
-- Mark tasks or items as completed
-- Delegate all persistence to the repository
-
-### `TaskManager`
-Acts as the high-level controller for workflows across tasks.
+Responsible for all task-related operations. It builds upon `GenericService` and encapsulates the business logic related to `Task` and `ToDoItem`.
 
 **Responsibilities:**
-- Reorder tasks
-- Apply filters (state, title, GUID, deadline)
+- Create, update, and delete tasks
+- Reorder tasks by changing their position
+- Add, remove, or reorder `ToDoItem`s within a task
+- Mark an entire task or individual `ToDoItem`s as completed
+- Set task state (`PENDING`, `IN_PROGRESS`, etc.)
+- Count total tasks or total todos within a task
+- Perform filtering queries, including:
+    - By task state (`PENDING`, `IN_PROGRESS`, `COMPLETED`)
+    - By title substring
+    - By exact GUID
+    - By deadline range (optional feature)
 
-**Filters supported:**
-- By state (`PENDING`, `IN_PROGRESS`, `COMPLETED`)
-- By title (substring match)
-- By GUID (exact match)
-- By deadline range _(optional future feature)_
+The `TaskService` is the main interface between the CLI layer and your application's core logic.
 
 ### Error Handling
 - Task not found: 
@@ -275,9 +274,140 @@ task complete <guid>
 task delete <guid>
 task set-state <guid> completed
 task move <guid> <new_position>
+task count
 
 task todo add <task_guid> --text "My item"
 task todo complete <task_guid> <item_guid>
 task todo remove <task_guid> <item_guid>
 task todo move <task_guid> <item_guid> <new_position>
+task todo count <task_guid>
+```
+
+# Usage
+
+## 1. Create a new `Task`
+
+```bash
+python3 main.py create --title "Test CLI Task" --description "Testing full CLI flow" --responsible "Tester" --deadline 2025-05-30
+```
+
+## 2. List all `Task`s
+
+```bash
+python3 main.py list
+```
+
+### Optional filters
+
+```bash
+# Filter by title substring
+python3 main.py list --title "Test"
+
+# Filter by state
+python3 main.py list --state completed
+
+# Filter tasks due in the next 3 days (default)
+python3 main.py list --due-soon
+
+# Filter tasks due in the next N days
+python3 main.py list --due-soon 10
+
+# Sort tasks by deadline or position
+python3 main.py list --sort-by deadline
+python3 main.py list --sort-by position
+
+# Show output in raw JSON format
+python3 main.py list --json
+```
+
+## 3. Filter `Task`s by `title` or `state`
+
+```bash
+python3 main.py list --title "Test"
+python3 main.py list --state completed
+```
+
+## 4. View a `Task`
+
+```bash
+python3 main.py view <task_guid>
+```
+
+## 5. Update a `Task`
+
+```bash
+python3 main.py update <task_guid> --description "Updated desc" --responsible "Someone"
+```
+
+## 6. Set `Task`'s state manually
+
+```bash
+python3 main.py set-state <task_guid> in_progress
+```
+
+## 7. Mark `Task` as complete
+
+```bash
+python3 main.py complete <task_guid>
+```
+
+## 8. Move a `Task` to another position
+
+```bash
+python3 main.py move <task_guid> 2
+```
+
+## 9. Count all `Task`s
+
+```bash
+python3 main.py count
+```
+
+## 10. Add `ToDoItem`s
+
+```bash
+python3 main.py todo add <task_guid> --text "Step one"
+python3 main.py todo add <task_guid> --text "Step two"
+```
+
+## 11. View updated `Task` with `ToDoItem`s
+
+```bash
+python3 main.py view <task_guid>
+```
+
+## 12. Update a `ToDoItem`
+
+```bash
+python3 main.py todo update <TASK_GUID> 2 --text "Revised step two" --position 1
+```
+
+## 13. Mark a `ToDoItem` as complete
+
+```bash
+python3 main.py todo complete <task_guid> 1
+```
+
+## 14. Move a `ToDoItem`
+
+```bash
+python3 main.py todo move <task_guid> 1 3
+```
+
+## 15. Count `ToDoItem`s
+
+```bash
+python3 main.py todo count <task_guid>
+```
+
+## 16. Remove a `ToDoItem`
+
+```bash
+python3 main.py todo remove <task_guid> 2
+```
+
+## 17. Delete a `Task`
+
+```bash
+python3 main.py delete <task_guid>
 ```

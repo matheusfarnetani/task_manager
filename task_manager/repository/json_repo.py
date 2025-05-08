@@ -1,4 +1,5 @@
 # task_manager/repository/json_repo.py
+
 import json
 import os
 from typing import List, Optional
@@ -28,6 +29,9 @@ class JsonTaskRepository(ITaskRepository):
 
     def list_all(self) -> List[Task]:
         return self._read_all()
+    
+    def update_all(self, tasks: List[Task]) -> None:
+        self._write_all(tasks)
 
     def get_by_guid(self, guid: str) -> Optional[Task]:
         return next((t for t in self._read_all() if t.guid == guid), None)
@@ -53,3 +57,7 @@ class JsonTaskRepository(ITaskRepository):
 
     def count(self) -> int:
         return len(self._read_all())
+    
+    def replace_all(self, tasks: List[Task]) -> None:
+        self._write_all(tasks)
+
